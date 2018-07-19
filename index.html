@@ -1,12 +1,43 @@
 <html>
 <head>
   <title>Pinterest sign in demo</title>
+  <style>
+    #container {
+      margin: 20% auto;
+      width: 268px;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    #login {
+      background-image: url(/sign-in-with-pinterest-1x.png);
+      width: 268px;
+      height: 40px;
+    }
+
+    #logout {
+      width: 268px;
+      height: 40px;
+    }
+
+    #userdata a {
+      display: block;
+      margin-top: 10px;
+      color: #900;
+      font-size: 18px;
+    }
+  </style>
 </head>
 <body>
 
-  <button style="display: none;" id="login">Log in with Pinterest</button>
-  <button style="display: none;" id="logout">Log out</button>
-  <div id="userdata"></div>
+  <div id="container">
+    <h2>Sign in with Pinterest</h2>
+    <button style="display: none;" id="login" />
+    <button style="display: none;" id="logout">Log out</button>
+    <div id="userdata"></div>
+  </div>
 
   <script>
     const login = document.getElementById('login');
@@ -16,8 +47,8 @@
     class UIHandler {
       static onLoggedIn(data) {
         userdata.innerHTML = '';
-        const link = document.createElement("a");
-        const node = document.createTextNode(data.first_name + ' ' + data.last_name);
+        const link = document.createElement('a');
+        const node = document.createTextNode('You are logged in as: ' + data.first_name + ' ' + data.last_name);
         link.appendChild(node);
         link.href = data.url;
         link.target = '_blank';
@@ -123,6 +154,6 @@
       js.src = "https://assets.pinterest.com/sdk/sdk.js";
       pjs.parentNode.insertBefore(js, pjs);
     }(document, 'script', 'pinterest-jssdk'));
-</script>
+  </script>
 </body>
 </html>
