@@ -1,0 +1,128 @@
+<html>
+<head>
+  <title>Pinterest sign in demo</title>
+</head>
+<body>
+
+  <button style="display: none;" id="login">Log in with Pinterest</button>
+  <button style="display: none;" id="logout">Log out</button>
+  <div id="userdata"></div>
+
+  <script>
+    const login = document.getElementById('login');
+    const logout = document.getElementById('logout');
+    const userdata = document.getElementById('userdata');
+
+    class UIHandler {
+      static onLoggedIn(data) {
+        userdata.innerHTML = '';
+        const link = document.createElement("a");
+        const node = document.createTextNode(data.first_name + ' ' + data.last_name);
+        link.appendChild(node);
+        link.href = data.url;
+        link.target = '_blank';
+
+        userdata.appendChild(link);
+
+        logout.addEventListener('click', () => {
+          PinterestLogin.logout();
+        });
+
+        login.style.display = 'none';
+        logout.style.display = 'block';
+        userdata.style.display = 'block';
+      }
+
+      static onLoggedOut() {
+        userdata.innerHTML = '';
+        login.addEventListener('click', () => {
+          PinterestLogin.login();
+        });
+
+        login.style.display = 'block';
+        document.getElementById('logout').style.display = 'none';
+      }
+    }
+
+    class PinterestLogin {
+      static login() {
+        PDK.login({ scope: SCOPE }, response => {
+          /** success format:
+           * {
+           *    session: {
+           *      accessToken: "",
+           *      scope: ""
+           *    }
+           * }
+           * error format:
+           * {
+           *    error: "message"
+           * }
+           */
+          if(response.error) {
+            alert(response.error);
+          } else {
+            PinterestLogin.getUserInfo(response.session);
+          }
+        });
+      }
+
+      static logout() {
+        PDK.logout(() => {
+          UIHandler.onLoggedOut();
+        });
+      }
+
+      static getUserInfo() {
+        PDK.me(result => {
+          /** response format:
+           * {
+           *    data: {
+           *      id: 123,
+           *      first_name: "Joe",
+           *      last_name: "Doe",
+           *      url: "https://www.pinterest.com/username/"
+           *   }
+           * }
+           */
+           UIHandler.onLoggedIn(result.data);
+        });
+      }
+
+      static init() {
+        PDK.init({
+          appId: APP_ID,
+          cookie: true
+        });
+
+        const session = PDK.getSession();
+        /** response format:
+         * {
+         *    accessToken: "",
+         *    scope: ""
+         * }
+         */
+
+        if (session) {
+          PinterestLogin.getUserInfo(session);
+        } else {
+          UIHandler.onLoggedOut();
+        }
+      }
+    }
+
+    const APP_ID = '<your-app-id>'; // change it
+    const SCOPE = 'read_public'; // configure if needed. Possible values include one or more of read_public, write_public, read_relationships, and write_relationships.
+
+    window.pAsyncInit = PinterestLogin.init;
+
+    (function(d, s, id){
+      var js, pjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) {return;}
+      js = d.createElement(s); js.id = id;
+      js.src = "https://assets.pinterest.com/sdk/sdk.js";
+      pjs.parentNode.insertBefore(js, pjs);
+    }(document, 'script', 'pinterest-jssdk'));
+</script>
+</body>
+</html>
